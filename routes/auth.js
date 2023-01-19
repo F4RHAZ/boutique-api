@@ -7,11 +7,13 @@ const jwt =require('jsonwebtoken');
 router.post("/register", async (req,res)=>{
 
   const newUser = new User({
-    username : req.body.username,
-    email : req.body.email,
-    phone : req.body.phone,
-    password : req.body.password
+    username : req.body.values.username,
+    email : req.body.values.email,
+    phone : req.body.values.phone,
+    password : req.body.values.password
   });
+
+  
 
   try{
     const savedUser = await newUser.save()
