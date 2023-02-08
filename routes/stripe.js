@@ -20,8 +20,7 @@ router.post("/create-checkout-session", async (req, res) => {
       size: item.size,
       inStock: item.inStock,
       color: item.color,
-      img: item.img,
-      price: item.price
+      price: item.price,
     }
   })
 
@@ -118,8 +117,11 @@ router.post("/create-checkout-session", async (req, res) => {
     line_items,
     mode: 'payment',
     customer: customer.id,
-    success_url: `${process.env.CLIENT_URL}/success`,
-    cancel_url:   `${process.env.CLIENT_URL}/cart`
+    success_url: "https://a-zboutiquefrontend.onrender.com/success",
+    cancel_url:   "https://a-zboutiquefrontend.onrender.com/cart",
+   
+    // success_url: `${process.env.CLIENT_URL}/success`,
+    // cancel_url:   `${process.env.CLIENT_URL}/cart`
   });
   res.send({url: session.url});
 });
@@ -135,7 +137,6 @@ const createOrder = async (customer, data) => {
   const products = Items.map((item) => {
     return {
       prodId: item.productId,
-      img: item.image,
       size: item.size,
       inStock: item.inStock,
       color: item.color,
@@ -161,7 +162,7 @@ const createOrder = async (customer, data) => {
 
   try {
     const savedOrder = await newOrder.save();
-    console.log("Processed Order:", savedOrder);
+    //console.log("Processed Order:", savedOrder);
   } catch (err) {
     console.log(err);
   }
@@ -190,31 +191,27 @@ router.post(
       let event;
       let signature = req.headers["stripe-signature"];
 
-    const payload = req.body;
-    const payloadString = JSON.stringify(payload, null, 2);
-    const header = stripe.webhooks.generateTestHeaderString({
-    payload: payloadString,
-    secret: process.env.STRIPE_WEB_HOOK,
-  });
-
-
-
-  try {
-    event = stripe.webhooks.constructEvent(payloadString, header, process.env.STRIPE_WEB_HOOK );
-    //console.log(`Webhook Verified: `, event);
-      } catch (err) {
-        console.log(`⚠️  Webhook signature verification failed:  ${err}`);
-        return res.sendStatus(400);
-      }
-      // Extract the object from the event.
-      data = event.data.object;
-      eventType = event.type;
+      const payload = req.body;
+      const payloadString = JSON.stringify(payload, null, 2);
+      const header = stripe.webhooks.generateTestHeaderString({
+      payload: payloadString,
+      secret: process.env.STRIPE_WEB_HOOK,
+    });
+     try {
+      event = stripe.webhooks.constructEvent(payloadString, header, process.env.STRIPE_WEB_HOOK );
+        //console.log(`Webhook Verified: `, event);
+        } catch (err) {
+          console.log(`⚠️  Webhook signature verification failed:  ${err}`);
+          return res.sendStatus(400);
+        }
+        // Extract the object from the event.
+        data = event.data.object;
+        eventType = event.type;
     } else {
       // Webhook signing is recommended, but if the secret is not configured in `config.js`,
       // retrieve the event data directly from the request body.
       data = req.body.data.object;
       eventType = req.body.type;
-     
     }
 
     // Handle the checkout.session.completed event
@@ -223,8 +220,7 @@ router.post(
         .retrieve(data.customer)
         .then(async (customer) => {
           try {
-            // CREATE ORDER
-            
+            // CREATE ORDER    
            // console.log("dataaaaaaaaa", data)
             createOrder(customer, data);
           } catch (err) {
@@ -242,3 +238,8 @@ router.post(
 
 
 module.exports = router;
+
+
+
+
+////https://a-zboutiquefrontend.onrender.com/api/checkout/webhook
