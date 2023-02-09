@@ -10,8 +10,8 @@ const stripe = Stripe(process.env.STRIPE_KEY);
 
 
 router.post("/create-checkout-session", async (req, res) => {
- 
- // console.log(req.body.cart1);
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   
   const cartStuff = req.body.cart1.map(item =>{
     return{
