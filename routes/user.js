@@ -77,10 +77,13 @@ router.get("/fetchorders/:userId", verifyTokenAndAdmin, async (req, res) => {
   }
 });
 
+
+
 //Get specific user Orders
 router.get("/fetchorder/:userId", verifyToken, async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.params.userId });
+    //console.log(req.params.userId);
+    const orders = await Order.find({userId: req.params.userId });
     //console.log(orders);
     res.status(200).json(orders);
   } catch (err) {
