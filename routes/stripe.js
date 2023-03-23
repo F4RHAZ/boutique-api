@@ -117,11 +117,11 @@ router.post("/create-checkout-session", async (req, res) => {
     line_items,
     mode: 'payment',
     customer: customer.id,
-    success_url: "https://a-zboutiquefrontend.onrender.com/success",
-    cancel_url:   "https://a-zboutiquefrontend.onrender.com/cart",
+    // success_url: "https://a-zboutiquefrontend.onrender.com/success",
+    // cancel_url:   "https://a-zboutiquefrontend.onrender.com/cart",
    
-    // success_url: `${process.env.CLIENT_URL}/success`,
-    // cancel_url:   `${process.env.CLIENT_URL}/cart`
+    success_url: `${process.env.CLIENT_URL}/success`,
+    cancel_url:   `${process.env.CLIENT_URL}/cart`
   });
   res.send({url: session.url});
 });
@@ -133,10 +133,11 @@ router.post("/create-checkout-session", async (req, res) => {
 
 const createOrder = async (customer, data) => {
   const Items = JSON.parse(customer.metadata.cart);
+  console.log(Items);
 
   const products = Items.map((item) => {
     return {
-      prodId: item.productId,
+      productId: item.productId,
       size: item.size,
       inStock: item.inStock,
       color: item.color,
@@ -162,7 +163,7 @@ const createOrder = async (customer, data) => {
 
   try {
     const savedOrder = await newOrder.save();
-    //console.log("Processed Order:", savedOrder);
+    console.log("Processed Order:", savedOrder);
   } catch (err) {
     console.log(err);
   }
@@ -181,8 +182,8 @@ router.post(
     let eventType;
 
     // Check if webhook signing is configured.
-    let webhookSecret;
-    webhookSecret = process.env.STRIPE_WEB_HOOK;
+    //let webhookSecret;
+    //webhookSecret = process.env.STRIPE_WEB_HOOK;
    
     if (webhookSecret) {
       console.log("webhook trial");
@@ -216,6 +217,7 @@ router.post(
 
     // Handle the checkout.session.completed event
     if (eventType === "checkout.session.completed") {
+      console.log("done")
       stripe.customers
         .retrieve(data.customer)
         .then(async (customer) => {

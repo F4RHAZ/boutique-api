@@ -21,6 +21,7 @@ router.post("/", verifyTokenAndAdmin, async(req,res) =>{
 //UPDATE PRODUCT
 router.put("/:id", verifyTokenAndAdmin, async(req,res) =>{
   try{
+    //console.log(req.body);
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       {
@@ -48,10 +49,23 @@ router.delete("/:id" , verifyTokenAndAdmin, async (req,res) =>{
 //GET SPECIFIC PRODUCT EVERYONE
 router.get("/find/:id", async (req,res) =>{
   try{
-
     const product = await Product.findById(req.params.id);
     res.status(200).json(product)
   }catch(err){
+    res.status(500).json(err);
+  }
+});
+
+
+
+//Get Product Image
+router.get("/find/:id/image", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    console.log(product)
+    const image = product.img;
+    res.status(200).json(image);
+  } catch (err) {
     res.status(500).json(err);
   }
 });
@@ -63,7 +77,7 @@ router.get("/", async(req,res) =>{
   try{
     let products;
     if(qNew){
-      products = await Product.find().sort({createdAt : -1}).limit(4);
+      products = await Product.find().sort({createdAt : -1}).limit(10);
     }else if(qCategory){
       products = await Product.find({
         categories : {

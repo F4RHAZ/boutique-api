@@ -2,7 +2,7 @@ const router = require("express").Router();
 const {verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin} = require("./verifyToken");
 const User = require("../models/User");
 const bcrypt = require('bcrypt');
-
+const Order = require("../models/Order");
 
 router.put("/:id", verifyTokenAndAuthorization, async (req,res)=>{
   if(req.body.password){
@@ -18,6 +18,7 @@ router.put("/:id", verifyTokenAndAuthorization, async (req,res)=>{
     res.status(500).json(err);
   }
 });
+
 
 
 //DELETE
@@ -62,32 +63,100 @@ router.get("/", verifyTokenAndAdmin, async(req, res)=>{
   }
 });
 
+
+//Get user Orders
+router.get("/fetchorders/:userId", verifyTokenAndAdmin, async (req, res) => {
+  try {
+   // console.log(req.params.userId)
+    const orders = await Order.find({ userId: req.params.userId });
+    //console.log(orders);
+    res.status(200).json(orders);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+
+//Get specific user Orders
+router.get("/fetchorder/:userId", verifyToken, async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.params.userId });
+    //console.log(orders);
+    res.status(200).json(orders);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+
+
+// // Get USER status
+// router.get("/stats", verifyTokenAndAdmin, async(req,res)=>{
+//   const date = new Date();
+//   const lastYear =  new Date(date.setFullYear(date.getFullYear() -1));
+ 
+//   try{
+//     const data = await User.aggregate([
+//       {$match : {createdAt : {$gte: lastYear } } },
+//       {
+//         $project : {
+//           month : { $month : "$createdAt"},
+//         },
+//       },
+//       {
+//         $group : {
+//           _id : "$month",
+//           total: {$sum: 1},
+//         },
+//       },
+//       {
+//         $sort: {
+//           total:1,
+//         },
+//       },
+//     ]);
+//     res.status(200).json(data)
+//     console.log(data)
+//   } catch(err){
+//       res.status(500).json(err);
+//   }
+//});
+
 // Get USER status
 router.get("/stats", verifyTokenAndAdmin, async(req,res)=>{
-  const date = new Date();
-  const lastYear =  new Date(date.setFullYear(date.getFullYear() -1));
- 
-  try{
+  const currentDate = new Date();
+  const lastYear = new Date(currentDate.setMonth(currentDate.getMonth() - 11)); // set the range to the past 12 months
+  try {
     const data = await User.aggregate([
-      {$match : {createdAt : {$gte: lastYear } } },
       {
-        $project : {
-          month : { $month : "$createdAt"},
-        },
+        $match : {
+          createdAt : {$gte: lastYear}
+        }
       },
       {
-        $group : {
-          _id : "$month",
-          total: {$sum: 1},
+        $project: {
+          month: {$month: "$createdAt"},
+          year: {$year: "$createdAt"}
+        }
+      },
+      {
+        $group: {
+          _id: {month: "$month", year: "$year"},
+          total: {$sum: 1}
+        }
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1
         }
       }
     ]);
-    res.status(200).json(data)
+    res.status(200).json(data);
+    //console.log(data)
   } catch(err){
-      res.status(500).json(err);
+    res.status(500).json(err);
   }
-
-
 });
 
 module.exports = router;
