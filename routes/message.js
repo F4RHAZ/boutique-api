@@ -7,7 +7,7 @@ const{verifyToken, verifyTokenAndAdmin,
   
 
 // POST /api/messages
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', async (req, res) => {
     try {
       const { senderId, recipientId, message } = req.body;
       const newMessage = await Message.create({ senderId, recipientId, message });
