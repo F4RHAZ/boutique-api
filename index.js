@@ -10,6 +10,7 @@ const orderRoute = require("./routes/order");
 const stripeRoute = require("./routes/stripe");
 const messageRoute = require("./routes/message");
 const announcement = require("./routes/announcement")
+const discount =  require("./routes/discount");
 const cors = require("cors");
 
 
@@ -36,6 +37,7 @@ app.use("/api/orders", orderRoute);
 app.use("/api/checkout", stripeRoute);
 app.use("/api/message", messageRoute);
 app.use("/api/announcements", announcement)
+app.use("/api/discount", discount);
 
 app.listen(process.env.PORT || 5000, ()=>{
   console.log("Backend server is running! ");
